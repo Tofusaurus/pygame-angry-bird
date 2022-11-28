@@ -248,4 +248,213 @@ class Maps:
 
         self.start_level(birds, pigs, blocks, walls)
 
+    def replay_level(self):
+        self.level -= 1
+        self.draw_map()
+
+    def start_again(self):
+        self.level = 1
+        self.draw_map()
+
+    def start_level(self, birds, pigs, blocks, walls):
+        loop = True
+
+        slingshot = physics_engine.Slingshot(200, height - 200, 30, 200)
+
+        birds[0].load(slingshot)
+
+        mouse_click = False
+        flag = 1
+
+        pigs_to_remove = []
+        blocks_to_remove = []
+
+        score_text = interface.Label(50, 10, 100, 50, None, self.color['background'])
+        score_text.add_text("SCORE: " + str(self.score), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+
+        birds_remaining = interface.Label(120, 50, 100, 50, None, self.color['background'])
+        birds_remaining.add_text("BIRDS REMAINING: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+
+        pigs_remaining = interface.Label(110, 90, 100, 50, None, self.color['background'])
+        pigs_remaining.add_text("PIGS REMAINING: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+
+      
+        while loop:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    close()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        close()
+                    if event.key == pygame.K_r:
+                        self.draw_map()
+                    if event.key == pygame.K_p:
+                        self.pause()
+                    if event.key == pygame.K_ESCAPE:
+                        self.pause()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if birds[0].mouse_selected():
+                        mouse_click = True
+                if event.type == pygame.MOUSEBUTTONUP:
+                    mouse_click = False
+                    if birds[0].mouse_selected():
+                        flag = 0
+
+            if (not birds[0].loaded) and all_rest(pigs, birds, blocks):
+                print("LOADED!")
+                birds.pop(0)
+                if self.check_win(pigs, birds) == 1:
+                    self.score += len(birds)*100
+                    self.level_cleared()
+                elif self.check_win(pigs,birds) == 0:
+                    self.level_failed()
+
+                if not birds == []:
+                    birds[0].load(slingshot)
+                flag = 1
+
+            if mouse_click:
+                birds[0].reposition(slingshot, mouse_click)
+
+            if not flag:
+                birds[0].unload()
+
+            #display.fill(self.color['background'])
+            color = self.color['background']
+            for i in range(3):
+                color = (color[0] + 5, color[1] + 5, color[2] + 5)
+                pygame.draw.rect(display, color, (0, i*300, width, 300))
+
+            pygame.draw.rect(display, (77, 86, 86), (0, height, width, 50))
+
+
+            slingshot.draw(birds[0])
+
+            for i in range(len(pigs)):
+                for j in range(len(blocks)):
+                    pig_v, block_v = pigs[i].velocity.magnitude, blocks[j].velocity.magnitude
+                    pigs[i], blocks[j], result_block_pig = physics_engine.collision_handler(pigs[i], blocks[j], "BALL_N_BLOCK")
+                    pig_v1, block_v1 = pigs[i].velocity.magnitude, blocks[j].velocity.magnitude
+
+                    if result_block_pig:
+                        if abs(pig_v - pig_v1) > d_velocity:
+                            blocks_to_remove.append(blocks[j])
+                            blocks[j].destroy()
+                        if abs(block_v - block_v1) > d_velocity:
+                            pigs_to_remove.append(pigs[i])
+                            pigs[i].dead()
+
+            for i in range(len(birds)):
+                if not (birds[i].loaded or birds[i].velocity.magnitude == 0):
+                    for j in range(len(blocks)):
+                        birds_v, block_v = birds[i].velocity.magnitude, blocks[j].velocity.magnitude
+                        birds[i], blocks[j], result_bird_block = physics_engine.collision_handler(birds[i], blocks[j], "BALL_N_BLOCK")
+                        birds_v1, block_v1 = birds[i].velocity.magnitude, blocks[j].velocity.magnitude
+
+                        if result_bird_block:
+                            if abs(birds_v - birds_v1) > d_velocity:
+                                if not blocks[j] in blocks_to_remove:
+                                    blocks_to_remove.append(blocks[j])
+                                    blocks[j].destroy()
+
+            for i in range(len(pigs)):
+                pigs[i].move()
+                for j in range(i+1, len(pigs)):
+                    pig1_v, pig2_v = pigs[i].velocity.magnitude, pigs[j].velocity.magnitude
+                    pigs[i], pigs[j], result = physics_engine.collision_handler(pigs[i], pigs[j], "BALL")
+                    pig1_v1, pig2_v1 = pigs[i].velocity.magnitude, pigs[j].velocity.magnitude
+                    result = True
+                    if result:
+                        if abs(pig1_v - pig1_v1) > d_velocity:
+                            if not pigs[j] in pigs_to_remove:
+                                pigs_to_remove.append(pigs[j])
+                                pigs[j].dead()
+                        if abs(pig2_v - pig2_v1) > d_velocity:
+                            if not pigs[i] in pigs_to_remove:
+                                pigs_to_remove.append(pigs[i])
+                                pigs[i].dead()
+
+                for wall in walls:
+                    pigs[i] = wall.collision_manager(pigs[i])
+
+                pigs[i].draw()
+
+            for i in range(len(birds)):
+                if (not birds[i].loaded) and birds[i].velocity.magnitude:
+                    birds[0].move()
+                    for j in range(len(pigs)):
+                        bird_v, pig_v = birds[i].velocity.magnitude, pigs[j].velocity.magnitude
+                        birds[i], pigs[j], result_bird_pig = physics_engine.collision_handler(birds[i], pigs[j], "BALL")
+                        bird_v1, pig_v1 = birds[i].velocity.magnitude, pigs[j].velocity.magnitude
+                        result = True
+                        if result_bird_pig:
+                            if abs(bird_v - bird_v1) > d_velocity:
+                                if not pigs[j] in pigs_to_remove:
+                                    pigs_to_remove.append(pigs[j])
+                                    pigs[j].dead()
+
+                if birds[i].loaded:
+                    birds[i].project_path()
+
+                for wall in walls:
+                    birds[i] = wall.collision_manager(birds[i])
+
+                birds[i].draw()
+
+            for i in range(len(blocks)):
+                for j in range(i + 1, len(blocks)):
+                    block1_v, block2_v = blocks[i].velocity.magnitude, blocks[j].velocity.magnitude
+                    blocks[i], blocks[j], result_block = physics_engine.block_collision_handler(blocks[i], blocks[j])
+                    block1_v1, block2_v1 = blocks[i].velocity.magnitude, blocks[j].velocity.magnitude
+
+                    if result_block:
+                        if abs(block1_v - block1_v1) > d_velocity:
+                            if not blocks[j] in blocks_to_remove:
+                                blocks_to_remove.append(blocks[j])
+                                blocks[j].destroy()
+                        if abs(block2_v - block2_v1) > d_velocity:
+                            if not blocks[i] in blocks_to_remove:
+                                blocks_to_remove.append(blocks[i])
+                                blocks[i].destroy()
+
+                blocks[i].move()
+
+                for wall in walls:
+                    blocks[i] = wall.collision_manager(blocks[i], "BLOCK")
+
+                blocks[i].draw()
+
+            for wall in walls:
+                wall.draw()
+
+            score_text.add_text("SCORE: " + str(self.score), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+            score_text.draw()
+
+            birds_remaining.add_text("BIRDS REMAINING: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+            birds_remaining.draw()
+
+            pigs_remaining.add_text("PIGS REMAINING: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+            pigs_remaining.draw()
+
     
+
+            pygame.display.update()
+
+            if all_rest(pigs, birds, blocks):
+                for pig in pigs_to_remove:
+                    if pig in pigs:
+                        pigs.remove(pig)
+                        self.score += 100
+
+                for block in blocks_to_remove:
+                    if block in blocks:
+                        blocks.remove(block)
+                        self.score += 50
+
+                pigs_to_remove = []
+                blocks_to_remove = []
+
+            clock.tick(60)
+
+   
