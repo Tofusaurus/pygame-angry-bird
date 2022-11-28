@@ -273,10 +273,10 @@ class Maps:
         score_text.add_text("SCORE: " + str(self.score), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
 
         birds_remaining = interface.Label(120, 50, 100, 50, None, self.color['background'])
-        birds_remaining.add_text("BIRDS REMAINING: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+        birds_remaining.add_text("BIRDS LEFT: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
 
         pigs_remaining = interface.Label(110, 90, 100, 50, None, self.color['background'])
-        pigs_remaining.add_text("PIGS REMAINING: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+        pigs_remaining.add_text("PIGS LEFT: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
 
       
         while loop:
@@ -320,7 +320,6 @@ class Maps:
             if not flag:
                 birds[0].unload()
 
-            #display.fill(self.color['background'])
             color = self.color['background']
             for i in range(3):
                 color = (color[0] + 5, color[1] + 5, color[2] + 5)
@@ -431,10 +430,10 @@ class Maps:
             score_text.add_text("SCORE: " + str(self.score), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
             score_text.draw()
 
-            birds_remaining.add_text("BIRDS REMAINING: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+            birds_remaining.add_text("BIRDS LEFT: " + str(len(birds)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
             birds_remaining.draw()
 
-            pigs_remaining.add_text("PIGS REMAINING: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
+            pigs_remaining.add_text("PIGS LEFT: " + str(len(pigs)), 25, "Fonts/SEASRN.ttf", (236, 240, 241))
             pigs_remaining.draw()
 
     
