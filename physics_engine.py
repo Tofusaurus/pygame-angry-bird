@@ -158,3 +158,29 @@ class Bird(Pig):
                 pygame.draw.ellipse(display, self.color, (point[0], point[1], 2, 2))
 
 
+class Slingshot:
+    def __init__(self, x, y, w, h, color=( 66, 73, 73 )):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.color = color
+
+    def rotate(self, coord, angle, anchor=(0, 0)):
+        corr = 0
+        return ((coord[0] - anchor[0])*cos(angle + radians(corr)) - (coord[1] - anchor[1])*sin(angle + radians(corr)),
+                (coord[0] - anchor[0])*sin(angle + radians(corr)) + (coord[1] - anchor[1])*cos(angle + radians(corr)))
+
+    def translate(self, coord):
+        return [coord[0] + self.x, coord[1] + self.y]
+
+    def draw(self, loaded=None):
+        pygame.draw.rect(display, self.color, (self.x, self.y + self.h*1/3, self.w, self.h*2/3))
+
+        if (not loaded == None) and loaded.loaded:
+            pygame.draw.line(display, ( 100, 30, 22 ), (self.x - self.w/4 + self.w/4, self.y + self.h/6), (loaded.x, loaded.y + loaded.r/2), 10)
+            pygame.draw.line(display, ( 100, 30, 22 ), (self.x + self.w, self.y + self.h/6), (loaded.x + loaded.r, loaded.y + loaded.r/2), 10)
+
+        pygame.draw.rect(display, self.color, (self.x - self.w/4, self.y, self.w/2, self.h/3), 5)
+        pygame.draw.rect(display, self.color, (self.x + self.w - self.w/4, self.y, self.w/2, self.h/3), 5)
+        
