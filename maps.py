@@ -457,4 +457,42 @@ class Maps:
 
             clock.tick(60)
 
-   
+    def level_failed(self):
+        level_failed_text = interface.Label(700, 100, 400, 200, None, self.color['background'])
+        level_failed_text.add_text("LEVEL FAILED!", 80, "Fonts/SEASRN.ttf", (236, 240, 241))
+
+        score_text = interface.Label(750, 300, 300, 100, None, self.color['background'])
+        score_text.add_text("SCORE: " + str(self.score), 55, "Fonts/SEASRN.ttf", (236, 240, 241))
+
+        replay = interface.Button(500, 500, 300, 100, self.draw_map, (244, 208, 63), (247, 220, 111))
+        replay.add_text("TRY AGAIN", 60, "Fonts/Amatic-Bold.ttf", self.color['background'])
+
+        exit = interface.Button(1000, 500, 300, 100, close, (241, 148, 138), (245, 183, 177))
+        exit.add_text("QUIT", 60, "Fonts/Amatic-Bold.ttf", self.color['background'])
+
+     
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    close()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        close()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if replay.isActive():
+                        replay.action()
+                    if exit.isActive():
+                        exit.action()
+
+            replay.draw()
+            exit.draw()
+            level_failed_text.draw()
+            score_text.draw()
+         
+
+            pygame.display.update()
+            clock.tick(60)
+
+    
+    
