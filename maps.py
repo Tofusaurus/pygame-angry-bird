@@ -176,7 +176,7 @@ class Maps:
             pigs.append(physics_engine.Pig(1300, 500 - 60, 25))
             pigs.append(physics_engine.Pig(1300, height - 60, 25))
 
-            walls.append(objects.Slab(500, 400, 100, height - 400))
+           
             walls.append(objects.Slab(1000, 450, 500, 30))
 
             blocks.append(physics_engine.Block(1150, 500 - 100, 100))
@@ -190,7 +190,7 @@ class Maps:
             pigs.append(physics_engine.Pig(1300, 500 - 60, 25))
             pigs.append(physics_engine.Pig(1300, height - 60, 25))
 
-            walls.append(objects.Slab(1000, 0, 30, 450))
+      
             walls.append(objects.Slab(1000, 450, 500, 30))
 
             blocks.append(physics_engine.Block(1150, 500 - 100, 100))
