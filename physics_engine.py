@@ -36,3 +36,80 @@ inverse_friction = 0.99
 elasticity = 0.8
 block_elasticity = 0.7
 
+class Pig:
+    def __init__(self, x, y, r, v=None, type="PIG", loaded = False, color=(255, 255, 255)):
+        self.x = x
+        self.y = y
+        self.r = r
+        if v == None:
+            self.velocity = Vector()
+        else:
+            self.velocity = v
+
+        self.pigimage1 = pygame.image.load("Images/pig1.png").convert_alpha()
+        self.pigimage2 = pygame.image.load("Images/pig3.png").convert_alpha()
+
+        self.deadpig = pygame.image.load("Images/pig_damaged.png").convert_alpha()
+
+        self.birdimage = pygame.image.load("Images/bird.png").convert_alpha()
+
+        if type == "PIG":
+            self.image = random.choice([self.pigimage1, self.pigimage2])
+        else:
+            self.image = self.birdimage
+
+        self.type = type
+        self.color = color
+        self.loaded = loaded
+        self.path = []
+        self.count = 0
+        self.count_animated = 0
+        self.isDead = False
+
+    def draw(self):
+        self.count_animated += 1
+
+        if self.type == "BIRD" and not self.loaded:
+            for point in self.path:
+                pygame.draw.ellipse(display, self.color, (point[0], point[1], 3, 3), 1)
+
+        if (self.type == "PIG") and (not self.count_animated%20) and (not self.isDead):
+            self.image = random.choice([self.pigimage1, self.pigimage2])
+
+        display.blit(self.image, (self.x - self.r, self.y - self.r))
+
+
+    def dead(self):
+        self.isDead = True
+        self.image = self.deadpig
+
+    def move(self):
+        self.velocity = add_vectors(self.velocity, gravity)
+
+        self.x += self.velocity.magnitude*sin(self.velocity.angle)
+        self.y -= self.velocity.magnitude*cos(self.velocity.angle)
+
+        self.velocity.magnitude *= inverse_friction
+
+        if self.x > width - self.r:
+            self.x = 2*(width - self.r) - self.x
+            self.velocity.angle *= -1
+            self.velocity.magnitude *= elasticity
+        elif self.x < self.r:
+            self.x = 2*self.r - self.x
+            self.velocity.angle *= -1
+            self.velocity.magnitude *= elasticity
+
+        if self.y > height - self.r:
+            self.y = 2*(height - self.r) - self.y
+            self.velocity.angle = pi - self.velocity.angle
+            self.velocity.magnitude *= elasticity
+        elif self.y < self.r:
+            self.y = 2*self.r - self.y
+            self.velocity.angle = pi - self.velocity.angle
+            self.velocity.magnitude *= elasticity
+
+        self.count += 1
+        if self.count%1 == 0:
+            self.path.append((self.x, self.y))
+
