@@ -113,3 +113,48 @@ class Pig:
         if self.count%1 == 0:
             self.path.append((self.x, self.y))
 
+class Bird(Pig):
+    def load(self, slingshot):
+        self.x = slingshot.x
+        self.y = slingshot.y
+        self.loaded = True
+
+    def mouse_selected(self):
+        pos = pygame.mouse.get_pos()
+        disx = pos[0] - self.x
+        disy = pos[1] - self.y
+        dist = hypot(disy, disx)
+        if dist < self.r:
+            return True
+
+        return False
+
+    def reposition(self, slingshot, mouse_click):
+        pos = pygame.mouse.get_pos()
+        if self.mouse_selected():
+            self.x = pos[0]
+            self.y = pos[1]
+
+            disx = slingshot.x - self.x
+            disy = slingshot.y - self.y
+            self.velocity.magnitude = int(hypot(disx, disy)/2)
+            if self.velocity.magnitude > 80:
+                self.velocity.magnitude = 80
+            self.velocity.angle = pi/2 + atan2(disy, disx)
+
+    def unload(self):
+        self.loaded = False
+
+    def project_path(self):
+        if self.loaded:
+            path = []
+            ball = Pig(self.x, self.y, self.r, self.velocity, self.type)
+            for i in range(30):
+                ball.move()
+                if i%5 == 0:
+                    path.append((ball.x, ball.y))
+
+            for point in path:
+                pygame.draw.ellipse(display, self.color, (point[0], point[1], 2, 2))
+
+
