@@ -1,1 +1,1 @@
-Setup Pygame
+Angry Bird pygame
