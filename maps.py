@@ -4,6 +4,10 @@ import sys
 import physics_engine
 import objects
 import interface
+import requests
+import random
+
+BASE_URL = "http://127.0.0.1:5000"
 
 pygame.init()
 height = None
@@ -256,6 +260,17 @@ class Maps:
         self.level = 1
         self.draw_map()
 
+    def send_level_info(self):
+        user_id = random.randint(0, 10)
+        json = {"level": self.level, "user_id": user_id, "score": self.score }
+        print("Send data")
+        print(json)
+        res = requests.post(f"{BASE_URL}/save_level", json=json)
+        if res.ok:
+            print("response")
+            print(res.json())
+
+
     def start_level(self, birds, pigs, blocks, walls):
         loop = True
 
@@ -306,7 +321,11 @@ class Maps:
                 birds.pop(0)
                 if self.check_win(pigs, birds) == 1:
                     self.score += len(birds)*100
+
+                    self.send_level_info()
                     self.level_cleared()
+                                        
+
                 elif self.check_win(pigs,birds) == 0:
                     self.level_failed()
 
